@@ -3,6 +3,7 @@ from threading import Thread
 import json
 from os import path
 from os import remove
+import errno
 
 users = {
     'albeiro' : [1,0],
@@ -78,6 +79,12 @@ class Client(Thread):
                         res = -1
 
                     response = json.dumps({"step": 5, "response": res})
+                elif step == 6:
+                    username = data.get('username')
+                    users[username][1] = 0
+                    del files[username]
+                    print(f"{username} se ha desconectado")
+                    self.join()
 
                 self.conn.send( response.encode( "UTF-8" ) )
             

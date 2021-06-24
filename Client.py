@@ -9,7 +9,7 @@ def main():
     name = ''
     response = ''
     option = 0
-
+    
     while userid < 1:
         if response != '':
             res = json.loads(response.decode('UTF-8'))
@@ -76,6 +76,9 @@ def main():
                 print(f"El archivo {filename} ha sido borrado")
 
         elif option == 4:
+            data = json.dumps({"step": 2 + option, "username": name})
+            s.send( data.encode("UTF-8") )
+            s.close()
             break
 
 if __name__ == "__main__":
