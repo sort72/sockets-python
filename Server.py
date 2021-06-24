@@ -73,6 +73,7 @@ class Client(Thread):
                     if path.exists(file_path) == True:
                         try:
                             res = remove(file_path)
+                            files[input_data[0]].remove(input_data[1])
                         except:
                             res = -1
                     else:
