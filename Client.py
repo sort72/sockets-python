@@ -95,6 +95,9 @@ def main():
             s.send( data.encode("UTF-8") )
             s.close()
             break
+        elif(option<1 or option>4):
+            system("cls")
+            print(f"{bcolors.FAIL}Opción inválida.{bcolors.ENDC}")
 
 if __name__ == "__main__":
     main()
