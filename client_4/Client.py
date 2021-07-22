@@ -32,20 +32,18 @@ class Server(Thread):
                     file_path = f'files/{fileName}'
                     if path.exists(file_path) == True:
                         res = open(file_path, 'r+', encoding='UTF-8')
+                        completeText = []
+                        endOfFile = True
+                        while endOfFile:
+                            archivo = res.read(900)
+                            if not archivo:
+                                endOfFile = False
+                            else:
+                                completeText.append(archivo)
+
+                        response = json.dumps({"step": 4, "response": completeText[0]})
                     else:
-                        res = -1
-
-                    completeText = []
-                    endOfFile = True
-                    while endOfFile:
-                        archivo = res.read(900)
-                        if not archivo:
-                            endOfFile = False
-                        else:
-                            completeText.append(archivo)
-
-                    response = json.dumps({"step": 4, "response": completeText[0]})
-
+                        response = json.dumps({"step": 4, "response": -1})
                 elif step == 2:
                     fileName = data.get('fileName')
                     file_path = f"files/{fileName}"

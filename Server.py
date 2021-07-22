@@ -32,7 +32,7 @@ class Client(Thread):
     def run(self):
         while True:
             data = self.conn.recv(1024)
-            try:
+            try: 
                 data = json.loads(data.decode('UTF-8'))
                 step = data.get('step')
 
