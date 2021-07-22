@@ -68,10 +68,35 @@ class Client(Thread):
                     sClient.connect(('localhost', user_ip))
                     data = json.dumps({"step": 1, "fileName":input_data[1]})
                     sClient.send( data.encode("UTF-8") )
-                    responseC = sClient.recv(1024)
-                    responseC = json.loads(responseC.decode('UTF-8'))
-                    responseC = responseC.get('response')
-                    response = json.dumps({"step": 4, "response": responseC})
+                    text = []
+                    fallo = False
+
+                    while True:
+                        responseC = sClient.recv(1024)
+                        responseC = json.loads(responseC.decode('UTF-8'))
+                        responseC = responseC.get('response')
+                        if(responseC != 'eof') and (responseC != -1):
+                            text.append(responseC)
+                            data = json.dumps({"step": 1, "fileName":input_data[1]})
+                            sClient.send( data.encode("UTF-8") )
+                        elif(responseC == -1):
+                            fallo = True
+                            break
+                        else:
+                            break
+
+                    if(not fallo):
+                        size = len(text)
+                        count = 0
+                        while count < size:
+                            response = json.dumps({"step": 4, "response": text[count]})
+                            self.conn.send( response.encode( "UTF-8" ) )
+                            count += 1
+                            data = self.conn.recv(1024)
+        
+                        response = json.dumps({"step": 4, "response": 'eof'})
+                    else:
+                        response = json.dumps({"step": 4, "response": -1})
 
                 elif step == 5:
                     input_data = data.get('filename')

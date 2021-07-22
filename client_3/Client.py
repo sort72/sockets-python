@@ -40,8 +40,10 @@ class Server(Thread):
                                 endOfFile = False
                             else:
                                 completeText.append(archivo)
-
-                        response = json.dumps({"step": 4, "response": completeText[0]})
+                                response = json.dumps({"step": 4, "response": archivo})
+                                self.conn.send( response.encode( "UTF-8" ) )
+                                data = self.conn.recv(1024)
+                        response = json.dumps({"step": 4, "response": 'eof'})
                     else:
                         response = json.dumps({"step": 4, "response": -1})
                 elif step == 2:
@@ -61,7 +63,7 @@ class Server(Thread):
                     print(f"{bcolors.FAIL}El servidor se ha desconectado{bcolors.ENDC}")
                     self.join()
                     break
-
+                    
                 self.conn.send( response.encode( "UTF-8" ) )
             except:
                 return False
@@ -135,15 +137,21 @@ def Cliente():
                 filename = input(f'{bcolors.darkgrey}Ingrese el nombre del propietario del archivo que desea leer, seguido del nombre del archivo. Ejemplo:{bcolors.ENDC} {bcolors.CYAN}rosa/hola.txt {bcolors.ENDC}\n')
                 data = json.dumps({"step": 2 + option, "filename": filename})
                 s.send( data.encode("UTF-8") )
-                response = s.recv(1024)
-                response = json.loads(response.decode('UTF-8'))
-                file_content = response.get('response')
-                if file_content == -1:
-                    print(f"{bcolors.FAIL}El archivo {filename} no existe{bcolors.ENDC}")
-                else:
-                    print(f"{bcolors.HEADER}El archivo {filename} contiene lo siguiente:{bcolors.ENDC}")
-                    print(f"{bcolors.lightgrey}{file_content}{bcolors.ENDC}")
-                    print('')
+
+                print(f"{bcolors.HEADER}El archivo {filename} contiene lo siguiente:{bcolors.ENDC}")
+                while True:
+                    responseC = s.recv(1024)
+                    responseC = json.loads(responseC.decode('UTF-8'))
+                    responseC = responseC.get('response')
+                    if (responseC != 'eof') and (responseC != -1):
+                        print(f"{bcolors.lightgrey}{responseC}{bcolors.ENDC}")
+                        data = json.dumps({"step": 4, "fileName":filename})
+                        s.send( data.encode("UTF-8") )
+                    elif(responseC == 'eof'):
+                        break
+                    else:
+                        print(f"{bcolors.FAIL}El archivo {filename} no existe{bcolors.ENDC}")
+                        break
 
             elif option == 3:
                 system("cls")
@@ -175,7 +183,7 @@ def Cliente():
 def Servidor():
     s = socket()
     
-    # Escuchar peticiones en el puerto 6031.
+    # Escuchar peticiones en el puerto 6033.
     s.bind(("localhost", 6033))
     s.listen(0)
     while True:
